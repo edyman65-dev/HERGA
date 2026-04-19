@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Feliz Aniversário Djeque 🎂</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #050505;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Georgia', serif;
+}
+#bg {
+  width: 100%; max-width: 460px; height: 100vh; max-height: 740px;
+  position: relative; background: #0a0a0a; overflow: hidden;
+}
+canvas#bc { display: block; width: 100%; height: 100%; touch-action: none; }
+#ui { position: absolute; inset: 0; pointer-events: none; }
+
+#lives { position: absolute; top: 10px; right: 12px; display: flex; gap: 5px; }
+.lv { font-size: 19px; }
+
+#splash {
+  position: absolute; inset: 0; background: #0a0a0a;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 28px; pointer-events: all; z-index: 20;
+}
+.sp-fire { font-size: 48px; animation: bob 1.2s infinite; margin-bottom: 10px; }
+@keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.sp-name { font-size: 52px; font-weight: 900; color: #FFD166; letter-spacing: 2px; line-height: 1; }
+.sp-age  { font-size: 80px; font-weight: 900; color: #FF6B35; line-height: 1; }
+.sp-anos { font-size: 18px; color: rgba(255,209,102,0.6); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+.sp-sub  { font-size: 13px; color: rgba(255,255,255,0.35); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+.sp-from { font-size: 15px; color: rgba(255,200,100,0.65); text-align: center; line-height: 1.7; margin-bottom: 26px; max-width: 300px; }
+.sp-btn  {
+  background: #FFD166; color: #1a1a1a; border: none; border-radius: 40px;
+  padding: 16px 48px; font-size: 19px; font-weight: 900; cursor: pointer;
+  box-shadow: 0 5px 0 #b89000; transition: transform .1s, box-shadow .1s; letter-spacing: 1px;
+}
+.sp-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #b89000; }
+
+#textbox {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(6,6,6,0.95); border-top: 1px solid rgba(255,209,102,0.18);
+  padding: 15px 18px 20px; pointer-events: all; display: none;
+}
+#speaker { font-size: 11px; color: #FFD166; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; font-family: 'Segoe UI', sans-serif; }
+#dialogue { font-size: 15px; color: #f5f0e8; line-height: 1.75; min-height: 52px; }
+#tap-hint { font-size: 11px; color: rgba(255,209,102,0.38); text-align: right; margin-top: 6px; font-family: 'Segoe UI', sans-serif; animation: blink 1.5s infinite; }
+@keyframes blink { 0%,100%{opacity:.38} 50%{opacity:1} }
+#choices { display: flex; flex-direction: column; gap: 9px; margin-top: 13px; }
+.choice {
+  background: rgba(255,209,102,0.07); border: 1px solid rgba(255,209,102,0.22);
+  border-radius: 22px; padding: 11px 18px; font-size: 14px; color: #f5f0e8;
+  cursor: pointer; font-family: 'Segoe UI', sans-serif; transition: background .2s; text-align: left;
+}
+.choice:hover { background: rgba(255,209,102,0.18); }
+
+#ending {
+  position: absolute; inset: 0; background: #050505;
+  display: none; flex-direction: column; align-items: center;
+  justify-content: center; padding: 30px 22px; text-align: center;
+  z-index: 30; overflow-y: auto;
+}
+#ending.show { display: flex; }
+.end-fire  { font-size: 44px; animation: bob 1.6s infinite; margin-bottom: 12px; }
+.end-tag   { font-size: 11px; color: rgba(255,209,102,0.4); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+.end-title { font-size: 28px; font-weight: 900; color: #FFD166; margin-bottom: 18px; }
+.end-card  {
+  background: rgba(255,209,102,0.05); border: 1px solid rgba(255,209,102,0.18);
+  border-radius: 16px; padding: 22px 24px; max-width: 360px; margin-bottom: 20px;
+  font-size: 15px; color: #f5f0e8; line-height: 1.85; white-space: pre-line; text-align: left;
+}
+.end-courage { font-size: 13px; color: rgba(255,209,102,0.5); margin-bottom: 20px; }
+.end-btn {
+  background: #FFD166; color: #1a1a1a; border: none; border-radius: 40px;
+  padding: 13px 34px; font-size: 16px; font-weight: 900; cursor: pointer;
+  box-shadow: 0 4px 0 #b89000;
+}
+</style>
+</head>
+<body>
+<div id="bg">
+  <canvas id="bc"></canvas>
+  <div id="ui">
+    <div id="lives"></div>
+
+    <div id="splash">
+      <div class="sp-fire">🎂🔥🎂</div>
+      <div class="sp-name">DJEQUE</div>
+      <div class="sp-age">23</div>
+      <div class="sp-anos">Anos</div>
+      <div class="sp-sub">De lendas em Maputo</div>
+      <div class="sp-from">Desde a escola primária até hoje —<br>esta é a vossa história, irmão. 🤝</div>
+      <button class="sp-btn" id="sp-btn">▶ COMEÇAR</button>
+    </div>
+
+    <div id="textbox">
+      <div id="speaker"></div>
+      <div id="dialogue"></div>
+      <div id="tap-hint" style="display:none">toca para continuar ▾</div>
+      <div id="choices"></div>
+    </div>
+  </div>
+
+  <div id="ending">
+    <div class="end-fire">🔥🎂🔥</div>
+    <div class="end-tag">Feliz Aniversário</div>
+    <div class="end-title">Djeque, meu irmão 🤝</div>
+    <div class="end-card" id="end-card"></div>
+    <div class="end-courage" id="end-courage"></div>
+    <button class="end-btn" onclick="restart()">Jogar de novo 🔄</button>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('bc');
+const ctx    = canvas.getContext('2d');
+const bg     = document.getElementById('bg');
+let W, H;
+function resize() {
+  W = canvas.width  = bg.clientWidth  || 420;
+  H = canvas.height = bg.clientHeight || 680;
+}
+resize();
+window.addEventListener('resize', resize);
+
+let scene = 'maputo', frameT = 0;
+let courage = 3, maxCourage = 5;
+let storyIdx = 0, typeTimer = null, typing = false, tapReady = false;
+
+// ── STARS ─────────────────────────────────────────────────────────
+const stars = Array.from({length:65}, () => ({
+  x: Math.random(), y: Math.random()*.42,
+  r: .4+Math.random()*1.5, t: Math.random()*Math.PI*2,
+}));
+
+function drawStars(maxFrac) {
+  stars.forEach(s => {
+    const a = .45+.55*Math.sin(frameT*.018+s.t);
+    ctx.fillStyle = `rgba(255,240,200,${a})`;
+    ctx.beginPath(); ctx.arc(s.x*W, s.y*H*(maxFrac||.45), s.r, 0, Math.PI*2); ctx.fill();
+  });
+}
+function drawMoon(x,y,r) {
+  ctx.fillStyle='#fff8d0'; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#f0e0a0'; ctx.beginPath(); ctx.arc(x+r*.22,y-r*.12,r*.74,0,Math.PI*2); ctx.fill();
+}
+
+// ── SCENE: MAPUTO ─────────────────────────────────────────────────
+function drawMaputo() {
+  ctx.fillStyle='#050510'; ctx.fillRect(0,0,W,H*.52);
+  drawStars(.52); drawMoon(W*.78,H*.09,W*.048);
+  [[0,.12,.4],[.13,.09,.32],[.23,.16,.5],[.41,.08,.3],[.5,.13,.44],[.66,.09,.36],[.77,.14,.46]].forEach(([bx,bw,bh])=>{
+    ctx.fillStyle='#0d0d1e'; ctx.fillRect(bx*W,H*(.52-bh),bw*W,bh*H);
+    for(let wy=8;wy<bh*H-10;wy+=16)
+      for(let wx=5;wx<bw*W-5;wx+=13)
+        if(Math.random()>.4){ ctx.fillStyle='rgba(255,220,100,.22)'; ctx.fillRect(bx*W+wx,H*(.52-bh)+wy,7,9); }
+  });
+  ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,H*.52,W,H*.48);
+  ctx.fillStyle='#141414'; ctx.fillRect(0,H*.65,W,H*.08);
+  ctx.fillStyle='rgba(255,209,102,.28)';
+  for(let x=0;x<W+60;x+=58) ctx.fillRect(x-((frameT*.4)%58),H*.685,36,5);
+  drawDjeque(W*.36,H*.83,'calm');
+  drawEdson(W*.6, H*.83);
+}
+
+// ── SCENE: RIO ────────────────────────────────────────────────────
+function drawRio() {
+  ctx.fillStyle='#020508'; ctx.fillRect(0,0,W,H);
+  drawStars(.45); drawMoon(W*.2,H*.08,W*.038);
+  [[.02,.3],[.08,.25],[.15,.32],[.72,.28],[.8,.33],[.88,.27],[.95,.3]].forEach(([tx,ty])=>{
+    ctx.fillStyle='#0a1a0a'; ctx.fillRect(tx*W-4,ty*H,8,H*.24);
+    ctx.fillStyle='#0d2a0d'; ctx.beginPath(); ctx.arc(tx*W,ty*H,W*.046,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(0,255,0,.035)'; ctx.beginPath(); ctx.arc(tx*W,ty*H,W*.072,0,Math.PI*2); ctx.fill();
+  });
+  const ry = H*.44;
+  ctx.fillStyle='#020d18'; ctx.fillRect(0,ry,W,H*.22);
+  for(let i=0;i<7;i++){
+    const wx=((frameT*.55+i*62)%W);
+    ctx.fillStyle=`rgba(0,160,255,${.035+.025*Math.sin(frameT*.025+i)})`;
+    ctx.fillRect(wx,ry+i*9,18+i*4,3);
+  }
+  // DRILOCOCOS eyes
+  const ex = W*(.28+.16*Math.sin(frameT*.013));
+  const ex2= W*(.62+.1 *Math.sin(frameT*.017+1));
+  [[ex,ry+H*.055],[ex2,ry+H*.09]].forEach(([cx,cy])=>{
+    ctx.fillStyle='#ff2200';
+    ctx.beginPath(); ctx.arc(cx,cy,4.5,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+W*.06,cy,4.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,34,0,.1)';
+    ctx.beginPath(); ctx.arc(cx+W*.03,cy,W*.045,0,Math.PI*2); ctx.fill();
+  });
+  ctx.fillStyle='#1a1408'; ctx.fillRect(0,H*.66,W,H*.34);
+  ctx.fillStyle='#231c0d'; ctx.fillRect(0,H*.42,W*.22,H*.06); ctx.fillRect(W*.78,H*.42,W*.22,H*.06);
+  drawDjeque(W*.2, H*.76,'scared');
+  drawEdson(W*.76,H*.76);
+}
+
+// ── SCENE: PARTY ─────────────────────────────────────────────────
+function drawParty() {
+  ctx.fillStyle='#0d0808'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='rgba(255,140,40,.07)'; ctx.fillRect(0,0,W,H);
+  [[.2,.14,'#ff4444'],[.5,.09,'#FFD166'],[.8,.12,'#44ff88'],[.35,.19,'#ff88cc'],[.65,.17,'#4488ff'],[.12,.22,'#FFD166'],[.88,.2,'#ff4444']].forEach(([bx,by,bc])=>{
+    const bv = Math.sin(frameT*.022+bx*10)*.014*H;
+    ctx.fillStyle=bc; ctx.beginPath(); ctx.arc(bx*W,by*H+bv,W*.033,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle=bc; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.moveTo(bx*W,by*H+bv+W*.033); ctx.lineTo(bx*W+W*.012,by*H+W*.075+bv); ctx.stroke();
+  });
+  ctx.strokeStyle='rgba(255,209,102,.22)'; ctx.lineWidth=2;
+  for(let x=0;x<W;x+=38){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x+22,H*.22); ctx.stroke(); }
+  ctx.fillStyle='#2a1808'; ctx.fillRect(W*.14,H*.54,W*.72,H*.038);
+  ctx.fillRect(W*.18,H*.54,W*.05,H*.13); ctx.fillRect(W*.77,H*.54,W*.05,H*.13);
+  ctx.fillStyle='#4a2a1a'; ctx.fillRect(W*.39,H*.41,W*.22,H*.14);
+  ctx.fillStyle='#ff6688'; ctx.fillRect(W*.37,H*.37,W*.26,H*.055);
+  ctx.fillStyle='#FFD166';
+  for(let i=0;i<3;i++) ctx.fillRect(W*(.41+i*.065),H*.3,W*.013,H*.07);
+  for(let i=0;i<3;i++){
+    const fl=Math.sin(frameT*.1+i)*2.5;
+    ctx.fillStyle='#ff8800'; ctx.beginPath(); ctx.arc(W*(.417+i*.065),H*.3+fl,W*.009,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(255,200,50,.4)'; ctx.beginPath(); ctx.arc(W*(.417+i*.065),H*.3+fl,W*.018,0,Math.PI*2); ctx.fill();
+  }
+  ctx.fillStyle='#0d0808'; ctx.fillRect(0,H*.67,W,H*.33);
+  ctx.fillStyle='#140d0a'; ctx.fillRect(0,H*.7,W,H*.06);
+  for(let i=0;i<22;i++){
+    const cx=((i*71+frameT*1.8)%W);
+    const cy=((i*43+frameT*2.2)%(H*.6));
+    ctx.fillStyle=['#FFD166','#ff4444','#44ff88','#ff88cc','#4488ff'][i%5];
+    ctx.fillRect(cx,cy,5,5);
+  }
+  drawDjeque(W*.34,H*.83,'happy');
+  drawEdson(W*.58,H*.83);
+}
+
+// ── SCENE: FUTURE ─────────────────────────────────────────────────
+function drawFuture() {
+  ctx.fillStyle='#0a0510'; ctx.fillRect(0,0,W,H*.52);
+  drawStars(.5);
+  ctx.fillStyle='rgba(255,140,50,.12)'; ctx.fillRect(0,H*.32,W,H*.24);
+  ctx.fillStyle='#FF6B35'; ctx.beginPath(); ctx.arc(W*.5,H*.54,W*.075,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,107,53,.1)'; ctx.beginPath(); ctx.arc(W*.5,H*.54,W*.18,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,107,53,.05)'; ctx.beginPath(); ctx.arc(W*.5,H*.54,W*.32,0,Math.PI*2); ctx.fill();
+  [[0,.11,.34],[.12,.08,.27],[.22,.14,.41],[.38,.08,.24],[.48,.12,.37],[.64,.09,.29],[.75,.13,.39]].forEach(([bx,bw,bh])=>{
+    ctx.fillStyle='#0d0810'; ctx.fillRect(bx*W,H*(.54-bh),bw*W,bh*H);
+  });
+  ctx.fillStyle='#0d0a08'; ctx.fillRect(0,H*.54,W,H*.46);
+  ctx.fillStyle='#1a1408'; ctx.fillRect(0,H*.68,W,H*.06);
+  drawDjeque(W*.36,H*.83,'calm');
+  drawEdson(W*.6, H*.83);
+}
+
+// ── CHARACTER: DJEQUE ─────────────────────────────────────────────
+function drawDjeque(x,y,mood) {
+  const s = W*.04;
+  const shk = mood==='scared' ? Math.sin(frameT*.35)*2.5 : 0;
+  ctx.save(); ctx.translate(shk,0);
+  ctx.fillStyle='#1a1a4a';
+  ctx.fillRect(x-s*.82,y+s*.28,s*.68,s*1.9); ctx.fillRect(x+s*.14,y+s*.28,s*.68,s*1.9);
+  ctx.fillStyle = mood==='scared'?'#224a22': mood==='happy'?'#2a7a2a':'#1e4a24';
+  ctx.fillRect(x-s*.98,y-s*2.15,s*1.96,s*2.55);
+  ctx.fillStyle = mood==='scared'?'#1a3a1a':'#163020';
+  ctx.fillRect(x-s*1.65,y-s*1.85,s*.68,s*2.1); ctx.fillRect(x+s*.97,y-s*1.85,s*.68,s*2.1);
+  ctx.fillStyle='#c09070';
+  ctx.beginPath(); ctx.arc(x-s*1.3,y+s*.32,s*.33,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+s*1.3,y+s*.32,s*.33,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2a1a0a'; ctx.beginPath(); ctx.arc(x,y-s*2.85,s*1.14,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#111';
+  if(mood==='scared'){
+    ctx.beginPath(); ctx.arc(x-s*.33,y-s*2.9,s*.2,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+s*.33,y-s*2.9,s*.2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#4488ff'; ctx.beginPath(); ctx.arc(x+s*.85,y-s*3.15,s*.13,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#4488ff'; ctx.beginPath(); ctx.arc(x-s*.85,y-s*3.1, s*.11,0,Math.PI*2); ctx.fill();
+  } else if(mood==='happy'){
+    ctx.beginPath(); ctx.arc(x-s*.32,y-s*2.94,s*.17,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+s*.32,y-s*2.94,s*.17,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#111'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.arc(x,y-s*2.64,s*.32,0,Math.PI); ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.arc(x-s*.31,y-s*2.92,s*.17,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+s*.31,y-s*2.92,s*.17,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#111'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(x-s*.2,y-s*2.62); ctx.lineTo(x+s*.2,y-s*2.62); ctx.stroke();
+  }
+  ctx.restore();
+  ctx.fillStyle='#FFD166'; ctx.font='700 '+Math.round(W*.022)+'px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('DJEQUE',x,y+s*2.5);
+  if(mood==='happy'){
+    ctx.font=Math.round(W*.052)+'px serif';
+    ctx.fillText('🎉',x-s*2.4,y-s*1.6); ctx.fillText('🎂',x+s*2,y-s*1.6);
+  }
+  ctx.fillStyle='#0a0a0a';
+  ctx.beginPath(); ctx.ellipse(x-s*.52,y+s*2.2,s*.46,s*.2,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x+s*.52,y+s*2.2,s*.46,s*.2,0,0,Math.PI*2); ctx.fill();
+}
+
+// ── CHARACTER: EDSON ──────────────────────────────────────────────
+function drawEdson(x,y) {
+  const s = W*.038;
+  ctx.fillStyle='#1a1a5a';
+  ctx.fillRect(x-s*.8,y+s*.28,s*.66,s*1.9); ctx.fillRect(x+s*.14,y+s*.28,s*.66,s*1.9);
+  ctx.fillStyle='#3a2a90'; ctx.fillRect(x-s*.96,y-s*2.15,s*1.92,s*2.55);
+  ctx.fillStyle='#2a1a6a';
+  ctx.fillRect(x-s*1.62,y-s*1.85,s*.66,s*2.1); ctx.fillRect(x+s*.96,y-s*1.85,s*.66,s*2.1);
+  ctx.fillStyle='#c09070';
+  ctx.beginPath(); ctx.arc(x-s*1.28,y+s*.32,s*.32,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+s*1.28,y+s*.32,s*.32,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#2a1a0a'; ctx.beginPath(); ctx.arc(x,y-s*2.82,s*1.12,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#1a0a00'; ctx.beginPath(); ctx.arc(x,y-s*3.32,s*.9,Math.PI,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#111';
+  ctx.beginPath(); ctx.arc(x-s*.3,y-s*2.9,s*.16,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+s*.3,y-s*2.9,s*.16,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='rgba(255,209,102,.55)'; ctx.font='700 '+Math.round(W*.019)+'px sans-serif'; ctx.textAlign='center';
+  ctx.fillText('EDSON',x,y+s*2.5);
+  ctx.fillStyle='#0a0a0a';
+  ctx.beginPath(); ctx.ellipse(x-s*.5,y+s*2.2,s*.44,s*.19,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(x+s*.5,y+s*2.2,s*.44,s*.19,0,0,Math.PI*2); ctx.fill();
+}
+
+// ── STORY ─────────────────────────────────────────────────────────
+const STORY = [
+  { scene:'maputo', spk:'✨ Narrador',    txt:'Maputo. Escola primária. Dois miúdos que ainda não sabiam que iam ser amigos para a vida.', next:1 },
+  { scene:'maputo', spk:'✨ Narrador',    txt:'Djeque era o mais calmo da turma. Enquanto todos entravam em pânico nas fichas, ele simplesmente... pensava.', next:2 },
+  { scene:'maputo', spk:'🧑🏾 Edson',     txt:'Djeque, empresta-me a borracha?', next:3 },
+  { scene:'maputo', spk:'🟢 Djeque',     txt:'*passa a borracha sem olhar* Já vi que erraste o exercício 3 também.', next:4 },
+  { scene:'maputo', spk:'🧑🏾 Edson',     txt:'...como é que ele sabia isso 😭', next:5 },
+  { scene:'maputo', spk:'✨ Narrador',    txt:'E foi assim. Sem drama, sem cerimónia. Só dois gajos de Maputo com uma amizade que veio para ficar.', next:6 },
+  { scene:'rio',    spk:'✨ Narrador',    txt:'Anos depois. Noite fechada. Convidados para o aniversário do Relson — mas o caminho passava por um rio.', next:7 },
+  { scene:'rio',    spk:'🧑🏾 Edson',     txt:'Djeque... vês aquilo na água? Aqueles... olhos vermelhos?', next:8 },
+  { scene:'rio',    spk:'🟢 Djeque',     txt:'*voz calma mas claramente a tremer* São... provavelmente pedras, Edson. Pedras com reflexo.', next:9 },
+  { scene:'rio',    spk:'🧑🏾 Edson',     txt:'Pedras não brilham no escuro, meu irmão. E pedras não SE MEXEM.', next:10 },
+  { scene:'rio',    spk:'🟢 Djeque',     txt:'*silêncio de 4 segundos* ...DRILOCOCOS.', next:11 },
+  { scene:'rio',    spk:'🧑🏾 Edson',     txt:'DRILOCOCOS!! 😭😭 O que fazemos?!', next:12 },
+  { scene:'rio',    spk:'🟢 Djeque',     txt:'*olha para o rio, olha para Edson, olha para o rio* Temos duas opções.', next:13, choices:[
+    { txt:'Atravessamos — o Relson precisa de nós! 💪', c:1, next:14 },
+    { txt:'Voltamos para casa, o Relson entende...', c:-1, next:15 },
+  ]},
+  { scene:'rio',    spk:'🟢 Djeque',     txt:'*respira fundo* Certo. Os DRILOCOCOS não vão comer dois homens de Maputo esta noite. Vamos.', next:16 },
+  { scene:'rio',    spk:'🟢 Djeque',     txt:'*pausa longa* ...Sim. Hoje o Relson celebra sem nós. Os DRILOCOCOS ganham esta batalha.', next:17 },
+  { scene:'rio',    spk:'✨ Narrador',    txt:'Djeque atravessou primeiro. Devagar. Sem respirar. Os DRILOCOCOS ficaram quietos — ou eram mesmo pedras. Nunca souberam ao certo.', next:18 },
+  { scene:'rio',    spk:'✨ Narrador',    txt:'Decidiram que era melhor noite para ficar em casa. Uma decisão sábia. Ou covarde. Provavelmente covarde.', next:18 },
+  { scene:'party',  spk:'✨ Narrador',    txt:'Do outro lado do rio (ou no dia seguinte): a festa do Relson. Música, luzes, e dois gajos felizes por estarem vivos.', next:19 },
+  { scene:'party',  spk:'🧑🏾 Edson',     txt:'*olhando para a sala* Djeque... JAGA DA BOA NACE 👀', next:20 },
+  { scene:'party',  spk:'🟢 Djeque',     txt:'*ajusta postura, completamente calmo* JAGA DA BOA NACE mesmo, Edson. JAGA DA BOA NACE mesmo. 😌', next:21 },
+  { scene:'party',  spk:'🧑🏾 Edson',     txt:'*alta gargalhada* Só tu consegues dizer isso com tanta classe 😂', next:22 },
+  { scene:'party',  spk:'✨ Narrador',    txt:'A festa foi épica. Mas a história dos DRILOCOCOS ficou. Essa história vai para sempre.', next:23 },
+  { scene:'future', spk:'✨ Narrador',    txt:'23 anos, Djeque. De miúdo calmo da escola primária a homem de Maputo que enfrenta rios às escuras.', next:24 },
+  { scene:'future', spk:'🧑🏾 Edson',     txt:'Tens 23. E eu ainda sou o teu amigo desde quando os dois tínhamos zero estilo e muito sono nas aulas.', next:25 },
+  { scene:'future', spk:'🟢 Djeque',     txt:'*olha para o horizonte, calmo como sempre* Ainda há muito para vir, irmão.', next:26 },
+  { scene:'future', spk:'🧑🏾 Edson',     txt:'Sobrevivemos à escola primária, aos DRILOCOCOS e a Maputo inteira. O futuro não tem hipótese contra nós. Feliz aniversário, meu irmão. 🎂🔥', next:'end' },
+];
+
+// ── HUD ───────────────────────────────────────────────────────────
+function updateLives() {
+  const bar = document.getElementById('lives');
+  bar.innerHTML = '';
+  for(let i=0;i<maxCourage;i++){
+    const l=document.createElement('span'); l.className='lv';
+    l.textContent = i<courage ? '💛' : '🖤';
+    bar.appendChild(l);
+  }
+}
+
+// ── TYPE WRITER ───────────────────────────────────────────────────
+function typeText(text, cb) {
+  clearInterval(typeTimer); typing=true; tapReady=false;
+  const el=document.getElementById('dialogue'); el.textContent=''; let i=0;
+  typeTimer=setInterval(()=>{
+    el.textContent+=text[i++];
+    if(i>=text.length){ clearInterval(typeTimer); typing=false; tapReady=true; if(cb) cb(); }
+  }, 24);
+}
+
+function showStep(idx) {
+  if(idx==='end'){ showEnding(); return; }
+  const step=STORY[idx]; if(!step){ showEnding(); return; }
+  storyIdx=idx; scene=step.scene;
+  const tb=document.getElementById('textbox'); tb.style.display='block';
+  document.getElementById('speaker').textContent=step.spk;
+  document.getElementById('choices').innerHTML='';
+  document.getElementById('tap-hint').style.display='none';
+  tapReady=false;
+  typeText(step.txt, ()=>{
+    if(step.choices){
+      const ch=document.getElementById('choices');
+      step.choices.forEach(c=>{
+        const btn=document.createElement('button'); btn.className='choice'; btn.textContent=c.txt;
+        btn.onclick=()=>{
+          courage=Math.max(1,Math.min(maxCourage,courage+(c.c||0)));
+          updateLives();
+          document.getElementById('choices').innerHTML='';
+          showStep(c.next);
+        };
+        ch.appendChild(btn);
+      });
+    } else {
+      document.getElementById('tap-hint').style.display='block';
+    }
+  });
+}
+
+document.getElementById('textbox').addEventListener('click', ()=>{
+  if(typing){
+    clearInterval(typeTimer); typing=false; tapReady=true;
+    document.getElementById('dialogue').textContent=STORY[storyIdx].txt;
+    if(!STORY[storyIdx].choices) document.getElementById('tap-hint').style.display='block';
+    return;
+  }
+  if(tapReady && !STORY[storyIdx].choices){
+    tapReady=false; document.getElementById('tap-hint').style.display='none';
+    showStep(STORY[storyIdx].next);
+  }
+});
+
+// ── ENDING ────────────────────────────────────────────────────────
+function showEnding() {
+  document.getElementById('ending').classList.add('show');
+  const letters = [
+`Djeque,
+
+Desde a escola primária até hoje —
+23 anos de vida, de histórias, de Maputo.
+
+Atravessámos um rio cheio de DRILOCOCOS
+só para ir a uma festa. Isso diz tudo.
+
+Que os 23 sejam grandes como tu és —
+calmo por fora, cheio de força por dentro.
+
+JAGA DA BOA NACE e feliz aniversário! 🎂🔥
+
+Com muito respeito e amizade,
+— Edson`,
+`Djeque,
+
+23 anos e ainda aqui —
+os dois de Maputo, os dois de pé.
+
+Não sei se os DRILOCOCOS existiam mesmo
+mas sei que a nossa amizade existe de verdade.
+
+Feliz aniversário, irmão. 🎂
+
+— Edson`,
+  ];
+  const idx = courage>=4?0:1;
+  document.getElementById('end-card').textContent = letters[idx];
+  document.getElementById('end-courage').textContent = 'Coragem desbloqueada: '+courage+' / '+maxCourage+' 💛';
+}
+
+function restart() {
+  courage=3; storyIdx=0; scene='maputo';
+  document.getElementById('ending').classList.remove('show');
+  document.getElementById('textbox').style.display='none';
+  document.getElementById('choices').innerHTML='';
+  document.getElementById('splash').style.display='flex';
+  updateLives();
+}
+
+// ── START ─────────────────────────────────────────────────────────
+document.getElementById('sp-btn').onclick=()=>{
+  document.getElementById('splash').style.display='none';
+  updateLives(); showStep(0);
+};
+
+function drawScene(s) {
+  ctx.clearRect(0,0,W,H);
+  if(s==='maputo')  drawMaputo();
+  else if(s==='rio') drawRio();
+  else if(s==='party') drawParty();
+  else if(s==='future') drawFuture();
+}
+
+updateLives();
+(function loop(){ frameT++; drawScene(scene); requestAnimationFrame(loop); })();
+</script>
+</body>
+</html>
